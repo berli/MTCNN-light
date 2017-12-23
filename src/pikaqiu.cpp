@@ -2,9 +2,9 @@
 #include "mtcnn.h"
 #include <time.h>
 
-int main()
+int main(int argc, char*argv[])
 {
-    Mat image = imread("4.jpg");
+    Mat image = imread(argv[1]);
     mtcnn find(image.rows, image.cols);
     clock_t start;
     start = clock();
