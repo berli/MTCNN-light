@@ -138,7 +138,7 @@ class mtcnn
 public:
     mtcnn(const int& row, const int& col);
     ~mtcnn();
-    void findFace(Mat &image);
+    int findFace(Mat &image);
 private:
     Mat reImage;
     float nms_threshold[3];

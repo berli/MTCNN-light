@@ -530,7 +530,7 @@ mtcnn::~mtcnn()
     delete []simpleFace_;
 }
 
-void mtcnn::findFace(Mat &image)
+int mtcnn::findFace(Mat &image)
 {
     struct orderScore order;
     int count = 0;
@@ -558,7 +558,7 @@ void mtcnn::findFace(Mat &image)
     }
     //the first stage's nms
     if(count<1)
-        return;
+        return -1;
     nms(firstBbox_, firstOrderScore_, nms_threshold[0]);
     refineAndSquareBbox(firstBbox_, image.rows, image.cols);
 
@@ -589,7 +589,7 @@ void mtcnn::findFace(Mat &image)
         }
     }
     if(count<1)
-       return;
+       return -2;
     nms(secondBbox_, secondBboxScore_, nms_threshold[1]);
     refineAndSquareBbox(secondBbox_, image.rows, image.cols);
 
@@ -632,11 +632,12 @@ void mtcnn::findFace(Mat &image)
     }
 
     if(count<1)
-      return;
+      return -3;
     
     refineAndSquareBbox(thirdBbox_, image.rows, image.cols);
     nms(thirdBbox_, thirdBboxScore_, nms_threshold[2], "Min");
-
+    
+    bool lbHave = false;
     for(vector<struct Bbox>::iterator it=thirdBbox_.begin(); it!=thirdBbox_.end();it++)
     {
         if((*it).exist)
@@ -644,6 +645,8 @@ void mtcnn::findFace(Mat &image)
             rectangle(image, Point((*it).y1, (*it).x1), Point((*it).y2, (*it).x2), Scalar(0,0,255), 2,8,0);
             for(int num=0;num<5;num++)
 	       circle(image,Point((int)*(it->ppoint+num), (int)*(it->ppoint+num+5)),3,Scalar(0,255,255), -1);
+
+	    lbHave = true;
         }
     }
 
@@ -653,5 +656,7 @@ void mtcnn::findFace(Mat &image)
     secondBboxScore_.clear();
     thirdBbox_.clear();
     thirdBboxScore_.clear();
+
+    return (lbHave?0:-1);
 }
 

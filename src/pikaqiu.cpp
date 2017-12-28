@@ -8,11 +8,13 @@ int main(int argc, char*argv[])
     mtcnn find(image.rows, image.cols);
     clock_t start;
     start = clock();
-    find.findFace(image);
+    int liRet = find.findFace(image);
+
+    namedWindow("result", CV_WINDOW_AUTOSIZE);
     imshow("result", image);
     imwrite("result.jpg",image);
     start = clock() -start;
-    cout<<"time is  "<<start/10e3<<" ms"<<endl;
+    cout<<"ret:"<<liRet<<" time is  "<<start/10e3<<" ms"<<endl;
     // Mat image;
     // VideoCapture cap(0);
     // if(!cap.isOpened())  
