@@ -563,22 +563,28 @@ void mtcnn::findFace(Mat &image){
 
     //third stage 
     count = 0;
-    for(vector<struct Bbox>::iterator it=secondBbox_.begin(); it!=secondBbox_.end();it++){
-        if((*it).exist){
+    for(vector<struct Bbox>::iterator it=secondBbox_.begin(); it!=secondBbox_.end();it++)
+    {
+        if((*it).exist)
+	{
             Rect temp((*it).y1, (*it).x1, (*it).y2-(*it).y1, (*it).x2-(*it).x1);
             Mat thirdImage;
             resize(image(temp), thirdImage, Size(48, 48), 0, 0, cv::INTER_LINEAR);
             outNet.run(thirdImage);
             mydataFmt *pp=NULL;
-            if(*(outNet.score_->pdata+1)>outNet.Othreshold){
+
+            if(*(outNet.score_->pdata+1)>outNet.Othreshold)
+	    {
                 memcpy(it->regreCoord, outNet.location_->pdata, 4*sizeof(mydataFmt));
                 it->area = (it->x2 - it->x1)*(it->y2 - it->y1);
                 it->score = *(outNet.score_->pdata+1);
                 pp = outNet.keyPoint_->pdata;
-                for(int num=0;num<5;num++){
+                for(int num=0;num<5;num++)
+		{
                     (it->ppoint)[num] = it->y1 + (it->y2 - it->y1)*(*(pp+num));
                 }
-                for(int num=0;num<5;num++){
+                for(int num=0;num<5;num++)
+		{
                     (it->ppoint)[num+5] = it->x1 + (it->x2 - it->x1)*(*(pp+num+5));
                 }
                 thirdBbox_.push_back(*it);
@@ -586,21 +592,29 @@ void mtcnn::findFace(Mat &image){
                 order.oriOrder = count++;
                 thirdBboxScore_.push_back(order);
             }
-            else{
+            else
+	    {
                 it->exist=false;
             }
         }
     }
 
-    if(count<1)return;
+    if(count<1)
+      return;
+    
     refineAndSquareBbox(thirdBbox_, image.rows, image.cols);
     nms(thirdBbox_, thirdBboxScore_, nms_threshold[2], "Min");
-    for(vector<struct Bbox>::iterator it=thirdBbox_.begin(); it!=thirdBbox_.end();it++){
-        if((*it).exist){
+
+    for(vector<struct Bbox>::iterator it=thirdBbox_.begin(); it!=thirdBbox_.end();it++)
+    {
+        if((*it).exist)
+	{
             rectangle(image, Point((*it).y1, (*it).x1), Point((*it).y2, (*it).x2), Scalar(0,0,255), 2,8,0);
-            for(int num=0;num<5;num++)circle(image,Point((int)*(it->ppoint+num), (int)*(it->ppoint+num+5)),3,Scalar(0,255,255), -1);
+            for(int num=0;num<5;num++)
+	       circle(image,Point((int)*(it->ppoint+num), (int)*(it->ppoint+num+5)),3,Scalar(0,255,255), -1);
         }
     }
+
     firstBbox_.clear();
     firstOrderScore_.clear();
     secondBbox_.clear();
