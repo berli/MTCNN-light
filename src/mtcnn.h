@@ -44,7 +44,7 @@ private:
     struct Weight *conv4c1_wb;
     struct Weight *conv4c2_wb;
 
-    void generateBbox(const struct pBox *score, const struct pBox *location, mydataFmt scale);
+    void generateBbox(const struct pBox *score, const struct pBox *location, mydataFmt& scale);
 };
 
 class Rnet
@@ -136,7 +136,7 @@ private:
 class mtcnn
 {
 public:
-    mtcnn(int row, int col);
+    mtcnn(const int& row, const int& col);
     ~mtcnn();
     void findFace(Mat &image);
 private:
