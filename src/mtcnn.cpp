@@ -50,6 +50,7 @@ Pnet::Pnet()
     string filename = "Pnet.txt";
     readData(filename, dataNumber, pointTeam);
 }
+
 Pnet::~Pnet()
 {
     freepBox(rgb);
@@ -87,7 +88,7 @@ void Pnet::run(Mat &image, float scale)
         maxPoolingInit(conv1, maxPooling1, 2, 2);
         feature2MatrixInit(maxPooling1, maxPooling_matrix, conv2_wb);
         convolutionInit(conv2_wb, maxPooling1, conv2, maxPooling_matrix);
-        
+
         feature2MatrixInit(conv2, conv3_matrix, conv3_wb);
         convolutionInit(conv3_wb, conv2, conv3, conv3_matrix);
 
@@ -110,7 +111,7 @@ void Pnet::run(Mat &image, float scale)
     feature2Matrix(maxPooling1, maxPooling_matrix, conv2_wb);
     convolution(conv2_wb, maxPooling1, conv2, maxPooling_matrix);
     prelu(conv2, conv2_wb->pbias, prelu_gmma2->pdata);
-    //conv3 
+    //conv3
     feature2Matrix(conv2, conv3_matrix, conv3_wb);
     convolution(conv3_wb, conv2, conv3, conv3_matrix);
     prelu(conv3, conv3_wb->pbias, prelu_gmma3->pdata);
@@ -128,9 +129,10 @@ void Pnet::run(Mat &image, float scale)
     //softmax layer
     generateBbox(score_, location_, scale);
 }
+
 void Pnet::generateBbox(const struct pBox *score, const struct pBox *location, mydataFmt& scale)
 {
-    //for pooling 
+    //for pooling
     int stride = 2;
     int cellsize = 12;
     int count = 0;
@@ -233,6 +235,7 @@ Rnet::Rnet()
     fullconnectInit(score_wb, score_);
     fullconnectInit(location_wb, location_);
 }
+
 Rnet::~Rnet()
 {
     freepBox(rgb);
@@ -259,16 +262,18 @@ Rnet::~Rnet()
     freeWeight(score_wb);
     freeWeight(location_wb);
 }
+
 void Rnet::RnetImage2MatrixInit(struct pBox *pbox)
 {
     pbox->channel = 3;
     pbox->height = 24;
     pbox->width = 24;
-    
+
     pbox->pdata = (mydataFmt *)malloc(pbox->channel*pbox->height*pbox->width*sizeof(mydataFmt));
     if(pbox->pdata==NULL)cout<<"the image2MatrixInit is failed!!"<<endl;
     memset(pbox->pdata, 0, pbox->channel*pbox->height*pbox->width*sizeof(mydataFmt));
 }
+
 void Rnet::run(Mat &image)
 {
     image2Matrix(image, rgb);
@@ -284,7 +289,7 @@ void Rnet::run(Mat &image)
     prelu(conv2_out, conv2_wb->pbias, prelu_gmma2->pdata);
     maxPooling(conv2_out, pooling2_out, 3, 2);
 
-    //conv3 
+    //conv3
     feature2Matrix(pooling2_out, conv3_matrix, conv3_wb);
     convolution(conv3_wb, pooling2_out, conv3_out, conv3_matrix);
     prelu(conv3_out, conv3_wb->pbias, prelu_gmma3->pdata);
@@ -394,6 +399,7 @@ Onet::Onet()
     fullconnectInit(location_wb, location_);
     fullconnectInit(keyPoint_wb, keyPoint_);
 }
+
 Onet::~Onet()
 {
     freepBox(rgb);
@@ -427,12 +433,13 @@ Onet::~Onet()
     freeWeight(location_wb);
     freeWeight(keyPoint_wb);
 }
+
 void Onet::OnetImage2MatrixInit(struct pBox *pbox)
 {
     pbox->channel = 3;
     pbox->height = 48;
     pbox->width = 48;
-    
+
     pbox->pdata = (mydataFmt *)malloc(pbox->channel*pbox->height*pbox->width*sizeof(mydataFmt));
     if(pbox->pdata==NULL)cout<<"the image2MatrixInit is failed!!"<<endl;
     memset(pbox->pdata, 0, pbox->channel*pbox->height*pbox->width*sizeof(mydataFmt));
@@ -453,7 +460,7 @@ void Onet::run(Mat &image)
     prelu(conv2_out, conv2_wb->pbias, prelu_gmma2->pdata);
     maxPooling(conv2_out, pooling2_out, 3, 2);
 
-    //conv3 
+    //conv3
     feature2Matrix(pooling2_out, conv3_matrix, conv3_wb);
     convolution(conv3_wb, pooling2_out, conv3_out, conv3_matrix);
     prelu(conv3_out, conv3_wb->pbias, prelu_gmma3->pdata);
@@ -530,11 +537,22 @@ mtcnn::~mtcnn()
     delete []simpleFace_;
 }
 
-int mtcnn::findFace(Mat &image)
+#if 0
+int mtcnn::alignFace(const Mat &image, vector<FaceInfo>&vecInfo, vector<Mat>&vecFaces)
+{
+    for(auto&m:vecInfo)
+    {
+      Mat faceROI = image(m).clone;
+      Point2f lefteye();
+    }
+}
+#endif
+
+int mtcnn::findFace(Mat &image, vector<FaceInfo>&vecFaceInfo)
 {
     struct orderScore order;
     int count = 0;
-    for (size_t i = 0; i < scales_.size(); i++) 
+    for (size_t i = 0; i < scales_.size(); i++)
     {
         int changedH = (int)ceil(image.rows*scales_.at(i));
         int changedW = (int)ceil(image.cols*scales_.at(i));
@@ -593,12 +611,12 @@ int mtcnn::findFace(Mat &image)
     nms(secondBbox_, secondBboxScore_, nms_threshold[1]);
     refineAndSquareBbox(secondBbox_, image.rows, image.cols);
 
-    //third stage 
+    //third stage
     count = 0;
     for(vector<struct Bbox>::iterator it=secondBbox_.begin(); it!=secondBbox_.end();it++)
     {
         if((*it).exist)
-	{
+        {
             Rect temp((*it).y1, (*it).x1, (*it).y2-(*it).y1, (*it).x2-(*it).x1);
             Mat thirdImage;
             resize(image(temp), thirdImage, Size(48, 48), 0, 0, cv::INTER_LINEAR);
@@ -606,17 +624,17 @@ int mtcnn::findFace(Mat &image)
             mydataFmt *pp=NULL;
 
             if(*(outNet.score_->pdata+1)>outNet.Othreshold)
-	    {
+            {
                 memcpy(it->regreCoord, outNet.location_->pdata, 4*sizeof(mydataFmt));
                 it->area = (it->x2 - it->x1)*(it->y2 - it->y1);
                 it->score = *(outNet.score_->pdata+1);
                 pp = outNet.keyPoint_->pdata;
                 for(int num=0;num<5;num++)
-		{
+                {
                     (it->ppoint)[num] = it->y1 + (it->y2 - it->y1)*(*(pp+num));
                 }
                 for(int num=0;num<5;num++)
-		{
+                {
                     (it->ppoint)[num+5] = it->x1 + (it->x2 - it->x1)*(*(pp+num+5));
                 }
                 thirdBbox_.push_back(*it);
@@ -625,7 +643,7 @@ int mtcnn::findFace(Mat &image)
                 thirdBboxScore_.push_back(order);
             }
             else
-	    {
+            {
                 it->exist=false;
             }
         }
@@ -633,18 +651,28 @@ int mtcnn::findFace(Mat &image)
 
     if(count<1)
       return -3;
-    
+
     refineAndSquareBbox(thirdBbox_, image.rows, image.cols);
     nms(thirdBbox_, thirdBboxScore_, nms_threshold[2], "Min");
-    
+
     bool lbHave = false;
+
+    vecFaceInfo.clear();
     for(vector<struct Bbox>::iterator it=thirdBbox_.begin(); it!=thirdBbox_.end();it++)
     {
         if((*it).exist)
 	{
+            FaceInfo lFace;
             rectangle(image, Point((*it).y1, (*it).x1), Point((*it).y2, (*it).x2), Scalar(0,0,255), 2,8,0);
+            Rect lrect(Point((*it).x1,(*it).y1),Point((*it).x2,(*it).y2));
+            lFace.faceRect = lrect;
             for(int num=0;num<5;num++)
-	       circle(image,Point((int)*(it->ppoint+num), (int)*(it->ppoint+num+5)),3,Scalar(0,255,255), -1);
+            {
+                Point lpt( (int)*(it->ppoint+num), (int)*(it->ppoint+num+5) );
+                circle(image,lpt,3,Scalar(0,255,255), -1);
+                lFace.vecPts.push_back(lpt);
+            }
+             vecFaceInfo.push_back(lFace);
 
 	    lbHave = true;
         }

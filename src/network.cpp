@@ -29,7 +29,7 @@ void image2MatrixInit(Mat &image, struct pBox *pbox){
     pbox->channel = image.channels();
     pbox->height = image.rows;
     pbox->width = image.cols;
-    
+
     pbox->pdata = (mydataFmt *)malloc(pbox->channel*pbox->height*pbox->width*sizeof(mydataFmt));
     if(pbox->pdata==NULL)cout<<"the image2MatrixInit failed!!"<<endl;
     memset(pbox->pdata, 0, pbox->channel*pbox->height*pbox->width*sizeof(mydataFmt));
@@ -70,7 +70,7 @@ void featurePad(const pBox *pbox, const pBox *outpBox, const int pad){
     mydataFmt *pIn = pbox->pdata;
 
     for (int row = 0; row < outpBox->channel*outpBox->height;row++){
-        
+
         if ((row%outpBox->height) <pad || (row % outpBox->height >(outpBox->height-pad-1))){
             p += outpBox->width;
             continue;
@@ -82,7 +82,7 @@ void featurePad(const pBox *pbox, const pBox *outpBox, const int pad){
     }
 }
 void feature2MatrixInit(const pBox *pbox, pBox *Matrix, const Weight *weight){
-    
+
     int kernelSize = weight->kernelSize;
     int stride = weight->stride;
     int w_out = (pbox->width - kernelSize) / stride + 1;//Õâ¸ö¹«Ê½Ò»¶¨Òª¸ãÇå³þ£¬¿ÉÒÔ×Ô¼ºÈ¥»­¸ö¾ØÕó¿´¿´
@@ -103,7 +103,7 @@ void feature2Matrix(const pBox *pbox, pBox *Matrix, const Weight *weight){
     int stride = weight->stride;
     int w_out = (pbox->width - kernelSize) / stride + 1;//Õâ¸ö¹«Ê½Ò»¶¨Òª¸ãÇå³þ£¬¿ÉÒÔ×Ô¼ºÈ¥»­¸ö¾ØÕó¿´¿´
     int h_out = (pbox->height - kernelSize) / stride + 1;
-    
+
     mydataFmt *p = Matrix->pdata;
     mydataFmt *pIn;
     mydataFmt * ptemp;
@@ -171,16 +171,24 @@ void maxPooling(const pBox *pbox, pBox *Matrix, int kernelSize, int stride){
     mydataFmt *pIn;
     mydataFmt *ptemp;
     mydataFmt maxNum = 0;
-    if((pbox->width-kernelSize)%stride==0){
-        for (int row = 0; row< Matrix->height; row ++){
-            for (int col = 0; col < Matrix->width; col++){
+    //if((pbox->width-kernelSize)%stride==0)
+    if((pbox->width-kernelSize)%stride==0 && (pbox->height - kernelSize) % stride == 0)
+    {
+        for (int row = 0; row< Matrix->height; row ++)
+        {
+            for (int col = 0; col < Matrix->width; col++)
+            {
                 pIn = pbox->pdata + row*stride*pbox->width + col*stride;
-                for (int channel = 0; channel < pbox->channel; channel++){
+                for (int channel = 0; channel < pbox->channel; channel++)
+                {
                     ptemp = pIn + channel*pbox->height*pbox->width;
                     maxNum = *ptemp;
-                    for (int kernelRow = 0; kernelRow < kernelSize; kernelRow++){
-                        for(int i=0;i<kernelSize;i++){
-                            if(maxNum<*(ptemp+i+kernelRow*pbox->width))maxNum=*(ptemp+i+kernelRow*pbox->width);
+                    for (int kernelRow = 0; kernelRow < kernelSize; kernelRow++)
+                    {
+                        for(int i=0;i<kernelSize;i++)
+                        {
+                            if(maxNum<*(ptemp+i+kernelRow*pbox->width))
+                                maxNum=*(ptemp+i+kernelRow*pbox->width);
                         }
                     }
                     *(p+channel*Matrix->height*Matrix->width) = maxNum;
@@ -191,14 +199,15 @@ void maxPooling(const pBox *pbox, pBox *Matrix, int kernelSize, int stride){
     }
     else{
         int diffh = 0, diffw = 0;
-        for (int channel = 0; channel < pbox->channel; channel++){  
+        for (int channel = 0; channel < pbox->channel; channel++){
             pIn = pbox->pdata + channel*pbox->height*pbox->width;
             for (int row = 0; row< Matrix->height; row ++){
                 for (int col = 0; col < Matrix->width; col++){
                     ptemp = pIn + row*stride*pbox->width + col*stride;
                     maxNum = *ptemp;
                     diffh = row*stride-pbox->height+1;
-                    diffw = col*stride-pbox->height+1;
+                    //diffw = col*stride-pbox->height+1;
+                    diffw = col*stride-pbox->width+1;
                     for (int kernelRow = 0; kernelRow < kernelSize; kernelRow++){
                         if((kernelRow+diffh)>0)break;
                         for(int i=0;i<kernelSize;i++){
@@ -282,16 +291,16 @@ void fullconnect(const Weight *weight, const pBox *pbox, pBox *outpBox){
     cblas_sgemv(CblasRowMajor, CblasNoTrans, weight->selfChannel, weight->lastChannel, 1, weight->pdata, weight->lastChannel, pbox->pdata, 1, 0, outpBox->pdata, 1);
 }
 void readData(string filename, long dataNumber[], mydataFmt *pTeam[]){
-    
+
     ifstream in(filename.data());
     string line;
     if(in)
-    {  
+    {
         int i = 0;
         int count = 0;
         int pos = 0;
-        while (getline (in, line))  
-        {   
+        while (getline (in, line))
+        {
             try{
                 if(i<dataNumber[count]){
                     line.erase(0,1);
@@ -314,11 +323,11 @@ void readData(string filename, long dataNumber[], mydataFmt *pTeam[]){
                 cout<<" yichang "<<i<<endl;
                 return;
             }
-        } 
-    }  
-    else 
-    {  
-        cout <<"no such file"<< filename << endl;  
+        }
+    }
+    else
+    {
+        cout <<"no such file"<< filename << endl;
     }
 }
 long initConvAndFc(struct Weight *weight, int schannel, int lchannel, int kersize, int stride, int pad){
@@ -404,7 +413,7 @@ void nms(vector<struct Bbox> &boundingBox_, vector<struct orderScore> &bboxScore
                 maxY = (boundingBox_.at(num).y1>boundingBox_.at(order).y1)?boundingBox_.at(num).y1:boundingBox_.at(order).y1;
                 minX = (boundingBox_.at(num).x2<boundingBox_.at(order).x2)?boundingBox_.at(num).x2:boundingBox_.at(order).x2;
                 minY = (boundingBox_.at(num).y2<boundingBox_.at(order).y2)?boundingBox_.at(num).y2:boundingBox_.at(order).y2;
-                //maxX1 and maxY1 reuse 
+                //maxX1 and maxY1 reuse
                 maxX = ((minX-maxX+1)>0)?(minX-maxX+1):0;
                 maxY = ((minY-maxY+1)>0)?(minY-maxY+1):0;
                 //IOU reuse for the area of two bbox
@@ -448,7 +457,7 @@ void refineAndSquareBbox(vector<struct Bbox> &vecBbox, const int &height, const 
 
             h = x2 - x1 + 1;
             w = y2 - y1 + 1;
-          
+
             maxSide = (h>w)?h:w;
             x1 = x1 + h*0.5 - maxSide*0.5;
             y1 = y1 + w*0.5 - maxSide*0.5;

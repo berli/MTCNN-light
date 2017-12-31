@@ -3,8 +3,6 @@ project(main)
 
 set(QMAKE_CXXFLAGS "-std=c++11")
 set(QMAKE_CXXFLAGS "-O3")
-include_directories(/home/liqi/SoftInstallPart/openblas/include)
-link_directories(/home/liqi/SoftInstallPart/openblas/lib)
 
 find_package( OpenCV REQUIRED)
 

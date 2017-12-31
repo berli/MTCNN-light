@@ -2,6 +2,12 @@
 #define MTCNN_H
 #include "network.h"
 
+struct FaceInfo
+{
+   Rect faceRect;
+   vector<Point> vecPts;
+};
+
 class Pnet
 {
 public:
@@ -71,7 +77,7 @@ private:
     struct pBox *conv3_out;
 
     struct pBox *fc4_out;
-    
+
     //Weight
     struct Weight *conv1_wb;
     struct pRelu *prelu_gmma1;
@@ -138,7 +144,7 @@ class mtcnn
 public:
     mtcnn(const int& row, const int& col);
     ~mtcnn();
-    int findFace(Mat &image);
+    int findFace(Mat &image, vector<FaceInfo>&vecFace);
 private:
     Mat reImage;
     float nms_threshold[3];
@@ -155,3 +161,4 @@ private:
 };
 
 #endif
+
