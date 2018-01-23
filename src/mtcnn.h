@@ -5,7 +5,11 @@
 struct FaceInfo
 {
    Rect faceRect;
-   vector<Point> vecPts;
+   vector<Point> vecPts;//vecPts[0]:leftEye
+                        //vecPts[1]:rightEye
+                        //vecPts[2]:nose
+                        //vecPts[3]:leftMouth
+                        //vecPts[4]:rightMouth
 };
 
 class Pnet
@@ -144,7 +148,9 @@ class mtcnn
 public:
     mtcnn(const int& row, const int& col);
     ~mtcnn();
-    int findFace(Mat &image, vector<FaceInfo>&vecFace);
+    int findFace(const Mat &image, vector<FaceInfo>&vecFace);
+    int alignFace(const Mat &image, vector<FaceInfo>&vecInfo, vector<Mat>&vecFaces);
+
 private:
     Mat reImage;
     float nms_threshold[3];

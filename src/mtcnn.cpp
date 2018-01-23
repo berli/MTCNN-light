@@ -537,18 +537,31 @@ mtcnn::~mtcnn()
     delete []simpleFace_;
 }
 
-#if 0
+#if 1
 int mtcnn::alignFace(const Mat &image, vector<FaceInfo>&vecInfo, vector<Mat>&vecFaces)
 {
     for(auto&m:vecInfo)
     {
-      Mat faceROI = image(m).clone;
-      Point2f lefteye();
+      Mat faceROI = image(m.faceRect).clone();
+      if(m.vecPts.size() != 5)
+        continue;//5 points is required
+      Point2f lefteye(m.vecPts[0]);
+      Point2f righteye(m.vecPts[1]);
+
+      Point2f center = Point2f((lefteye.x + righteye.x)*0.5, (lefteye.y + righteye.y)*0.5);  //两眼的中心点
+	  double dy = righteye.y - lefteye.y;
+	  double dx = righteye.x - lefteye.x;
+	  double angle = atan2(dy, dx)*180.0 / CV_PI;     //角度
+
+	  Mat rot_mat = getRotationMatrix2D(center, angle, 1.0);   //求得仿射矩阵
+	  Mat rot;         //变换后的人脸图像
+	  warpAffine(faceROI, rot, rot_mat, faceROI.size());    //仿射变换
+	  //仿射变换后，需要再定位一次人脸区域
     }
 }
 #endif
 
-int mtcnn::findFace(Mat &image, vector<FaceInfo>&vecFaceInfo)
+int mtcnn::findFace(const Mat &image, vector<FaceInfo>&vecFaceInfo)
 {
     struct orderScore order;
     int count = 0;

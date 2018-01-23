@@ -14,28 +14,35 @@ long getMillSeconds()
 
 int main(int argc, char*argv[])
 {
+    Mat image;
+    VideoCapture cap;
     if(argc ==2 )
     {
-    Mat image = imread(argv[1]);
-    mtcnn find(image.rows, image.cols);
-    long s = getMillSeconds();
+	 bool lbRet =  cap.open(argv[1]);
+	 if(!lbRet)
+	 {
+	   lbRet = cap.open(0);
+       cout<<"fail to open!"<<endl;
+	 }
+	 if(!lbRet)
+	 {
+       image = imread(argv[1]);
+       mtcnn find(image.rows, image.cols);
+       long s = getMillSeconds();
 
-    vector<FaceInfo>vecFace;
-    int liRet = find.findFace(image, vecFace);
+       vector<FaceInfo>vecFace;
+       int liRet = find.findFace(image, vecFace);
 
-    namedWindow("result", CV_WINDOW_AUTOSIZE);
-    imshow("result", image);
-    imwrite("result.jpg",image);
-    cout<<"ret:"<<liRet<<" time is  "<<(getMillSeconds()-s)/10e3<<" ms"<<endl;
-    waitKey(0);
-    image.release();
-    return 0;
+       namedWindow("result", CV_WINDOW_AUTOSIZE);
+       imshow("result", image);
+       imwrite("result.jpg",image);
+       cout<<"ret:"<<liRet<<" time is  "<<(getMillSeconds()-s)/10e3<<" ms"<<endl;
+       waitKey(0);
+       image.release();
+       return 0;
+	 }
   }
 
-  Mat image;
-  VideoCapture cap(0);
-  if(!cap.isOpened())
-      cout<<"fail to open!"<<endl;
   cap>>image;
   if(!image.data)
   {
@@ -50,10 +57,21 @@ int main(int argc, char*argv[])
   long s = getMillSeconds();
       cap>>image;
       find.findFace(image, vecFace);
+	int liFps = getMillSeconds() - s;
+    if( liFps > 0 )
+        liFps = 1000/liFps;
+    else
+        liFps = 1000;
+    
+    string lsFps = "fps:";
+    lsFps += to_string(liFps);
+    lsFps += " time is:";
+    lsFps += to_string(getMillSeconds()-s);
+    cv::putText(image, lsFps, cvPoint(3, 13),
+                    cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0, 255, 0), 1, CV_AA);
       imshow("result", image);
-      if( waitKey(1)>=0 ) break;
-      s = getMillSeconds() -s;
-      cout<<"time is  "<<s<<endl;
+      if( waitKey(1)>=0 ) 
+		  break;
   }
 
   waitKey(0);
