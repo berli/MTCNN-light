@@ -16,16 +16,17 @@ int main(int argc, char*argv[])
 {
     Mat image;
     VideoCapture cap;
-    if(argc ==2 )
+    if(argc == 1)
     {
-	 bool lbRet =  cap.open(argv[1]);
-	 if(!lbRet)
-	 {
-	   lbRet = cap.open(0);
-       cout<<"fail to open!"<<endl;
-	 }
-	 if(!lbRet)
-	 {
+       bool lbRet =  cap.open("../../hls-20.mp4");
+       if(!lbRet)
+       {
+          lbRet = cap.open(0);
+          cout<<"fail to open!"<<endl;
+       }
+    }
+    else if(argc ==2 )
+    {
        image = imread(argv[1]);
        mtcnn find(image.rows, image.cols);
        long s = getMillSeconds();
@@ -36,11 +37,10 @@ int main(int argc, char*argv[])
        namedWindow("result", CV_WINDOW_AUTOSIZE);
        imshow("result", image);
        imwrite("result.jpg",image);
-       cout<<"ret:"<<liRet<<" time is  "<<(getMillSeconds()-s)/10e3<<" ms"<<endl;
+       cout<<"ret:"<<liRet<<" time is  "<<(getMillSeconds()-s)<<" ms"<<endl;
        waitKey(0);
        image.release();
        return 0;
-	 }
   }
 
   cap>>image;
