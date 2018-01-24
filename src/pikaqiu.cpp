@@ -33,9 +33,13 @@ int main(int argc, char*argv[])
 
        vector<FaceInfo>vecFace;
        int liRet = find.findFace(image, vecFace);
+       vector<Mat>vecAlignFace;
+       liRet = find.alignFace(image, vecFace, vecAlignFace);
 
        namedWindow("result", CV_WINDOW_AUTOSIZE);
        imshow("result", image);
+       for(auto&m:vecAlignFace)
+           imshow("align", m);
        imwrite("result.jpg",image);
        cout<<"faces:"<<vecFace.size()<<" ret:"<<liRet<<" time is  "<<(getMillSeconds()-s)<<" ms"<<endl;
        waitKey(0);

@@ -149,7 +149,7 @@ public:
     mtcnn(const int& row, const int& col);
     ~mtcnn();
     int findFace(const Mat &image, vector<FaceInfo>&vecFace);
-    int alignFace(const Mat &image, vector<FaceInfo>&vecInfo, vector<Mat>&vecFaces);
+    int alignFace(const Mat &image, const vector<FaceInfo>&vecInfo, vector<Mat>&vecFaces);
 
 private:
     Mat reImage;
