@@ -7,7 +7,8 @@ set(QMAKE_CXXFLAGS "-O3")
 
 find_package( OpenCV REQUIRED)
 
-set(MAIN_SRCS  mtcnn/detection/MTCNN.cpp )
+include_directories(src/)
+set(MAIN_SRCS  pikaqiu.cpp )
 AUX_SOURCE_DIRECTORY(./src DIR_SRCS)
 add_executable( main ${DIR_SRCS} ${MAIN_SRCS})
 target_link_libraries( main ${OpenCV_LIBS} )
