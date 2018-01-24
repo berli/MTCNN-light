@@ -37,7 +37,7 @@ int main(int argc, char*argv[])
        namedWindow("result", CV_WINDOW_AUTOSIZE);
        imshow("result", image);
        imwrite("result.jpg",image);
-       cout<<"ret:"<<liRet<<" time is  "<<(getMillSeconds()-s)<<" ms"<<endl;
+       cout<<"faces:"<<vecFace.size()<<" ret:"<<liRet<<" time is  "<<(getMillSeconds()-s)<<" ms"<<endl;
        waitKey(0);
        image.release();
        return 0;
